@@ -13,6 +13,7 @@ from enum import (
 import time
 import random
 from itertools import islice
+import os
 
 import torch
 
@@ -22,7 +23,8 @@ from transformers import (
 )
 from datasets import (
     load_dataset,
-    IterableDataset
+    IterableDataset,
+    DownloadConfig,
 )
 
 from lyq.config import Configs
@@ -198,7 +200,7 @@ class LyqDataset:
         dataset: IterableDataset = load_dataset(
             self.dataset_name,
             split='train',
-            streaming=True
+            streaming=True,
         )
         self.logger.info("加载数据集成功！")
 
@@ -275,6 +277,45 @@ class LyqDataset:
 
         self._push_state()
         time.sleep(10) # 给一点时间用于释放
+    
+    def verify(self) -> bool:
+        self.logger.debug(
+            f"检查训练集和验证集有效性中..."
+        )
+
+        is_valid = True
+        train_num_samples = 0
+        valid_num_samples = 0
+        for _, stateitem in self.state.items():
+            train_num_samples += stateitem['train']['num_samples']
+            valid_num_samples += stateitem['valid']['num_samples']
+        
+        train_file_path = Path(self.configs.train_file)
+        valid_file_path = Path(self.configs.valid_file)
+        with train_file_path.open(encoding='utf-8') as train, \
+             valid_file_path.open(encoding='utf-8') as valid:
+            
+            cnt = 0
+            for line in train:
+                cnt += 1
+            if cnt != train_num_samples:
+                is_valid = False
+            self.logger.debug(
+                f"文件记录训练集样本量：{train_num_samples}\n"
+                f"实际训练集文件样本量：{cnt}"
+            )
+
+            cnt = 0
+            for line in valid:
+                cnt += 1
+            if cnt != valid_num_samples:
+                is_valid = False
+            self.logger.debug(
+                f"文件记录验证集样本量：{valid_num_samples}\n"
+                f"实际验证集文件样本量：{cnt}"
+            )
+
+        return is_valid
     
     def create_valid_subset(
         self,
