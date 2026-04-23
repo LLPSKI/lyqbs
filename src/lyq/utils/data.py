@@ -29,7 +29,8 @@ from lyq.config import Configs
 from lyq.log import Logger
 
 __all__ = [
-    "LyqDataset"
+    "LyqDataset",
+    "LyqDataLoaderIterator"
 ]
 
 class SampleSchema(TypedDict):
