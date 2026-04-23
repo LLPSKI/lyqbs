@@ -1,0 +1,37 @@
+from pathlib import Path
+
+__all__ = [
+    'is_files_all_exists',
+    'find_checkpoint'
+]
+
+def is_files_all_exists(
+    dir: str, 
+    files: list[str]
+) -> bool:
+    """
+    检查某一文件夹下是否具有全部要求的文件
+    """
+    is_all_exists = True
+    files = [dir + file for file in files]
+    for file in files:
+        file = Path(file)
+        if not file.exists():
+            is_all_exists = False
+            break
+    return is_all_exists
+
+def find_checkpoint(dir: str) -> Path | None:
+    """
+    检查某一目录下的保存点文件夹
+    """
+    path = Path(dir)
+    checkpoints = [
+        p for p in path.glob("checkpoint-*")
+        if p.is_dir()
+    ]
+
+    if not checkpoints:
+        return None
+    
+    return max(checkpoints, key=lambda x: x.name)
