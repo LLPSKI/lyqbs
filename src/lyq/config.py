@@ -1,18 +1,10 @@
 from pathlib import Path
 import json
 from typing import TypedDict
-from functools import cached_property, cache
+from functools import cached_property
 
 __all__ = [
-    'project_name',
-    'state_file',
-    'log_dir',
-    'data_dir',
-    'output_dir',
-    'dataset_dir',
-    'train_file',
-    'valid_file',
-    'small_valid_file'
+    'Configs'
 ]
 
 class _ConfigSchema(TypedDict):
@@ -54,20 +46,20 @@ class _ConfigSchema(TypedDict):
     base_dir: str
     data_dir: str
 
-class _Configs:
+class Configs:
     """
     配置类
 
-    - project_name[_path]  
-    - base_dir[_path]  
-        - state_file[_path]
-        - log_file[_path]
-    - data_dir[_path]
-        - output_dir[_path]
-        - dataset_dir[_path]
-            - train_file[_path]
-            - valid_file[_path]
-            - small_valid_file[_path]
+    - project_name
+    - base_dir
+        - state_file
+        - log_file
+    - data_dir
+        - output_dir
+        - dataset_dir
+            - train_file
+            - valid_file
+            - small_valid_file
     """
 
     _default_config: _ConfigSchema = {
@@ -136,38 +128,3 @@ class _Configs:
     @cached_property
     def small_valid_file(self) -> str:
         return self.dataset_dir + 'small_valid.jsonl'
-
-_configs = _Configs()
-
-@cache
-def project_name() -> str:
-    return _configs.project_name
-
-@cache
-def base_dir() -> str:
-    return _configs.base_dir
-@cache
-def state_file() -> str:
-    return _configs.state_file
-@cache
-def log_dir() -> str:
-    return _configs.log_dir
-
-@cache
-def data_dir() -> str:
-    return _configs.data_dir
-@cache
-def output_dir() -> str:
-    return _configs.output_dir
-@cache
-def dataset_dir() -> str:
-    return _configs.dataset_dir
-@cache
-def train_file() -> str:
-    return _configs.train_file
-@cache
-def valid_file() -> str:
-    return _configs.valid_file
-@cache
-def small_valid_file() -> str:
-    return _configs.small_valid_file
