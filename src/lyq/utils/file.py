@@ -2,7 +2,7 @@ from pathlib import Path
 
 __all__ = [
     'is_files_all_exists',
-    'find_checkpoint'
+    'find_max_checkpoint'
 ]
 
 def is_files_all_exists(
@@ -21,7 +21,9 @@ def is_files_all_exists(
             break
     return is_all_exists
 
-def find_checkpoint(dir: str) -> Path | None:
+def find_max_checkpoint(
+    dir: str
+) -> Path | None:
     """
     检查某一目录下的保存点文件夹
     """
