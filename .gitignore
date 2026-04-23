@@ -1,0 +1,7 @@
+*
+*python_test.py
+!src/
+!src/**/
+!*.py
+!*.sh
+!*.git*
