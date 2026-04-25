@@ -32,7 +32,8 @@ from lyq.log import Logger
 
 __all__ = [
     "LyqDataset",
-    "LyqDataLoaderIterator"
+    "LyqDataLoaderIterator",
+    'BatchTokendSample'
 ]
 
 class SampleSchema(TypedDict):
@@ -279,7 +280,7 @@ class LyqDataset:
         time.sleep(10) # 给一点时间用于释放
     
     def verify(self) -> bool:
-        self.logger.debug(
+        self.logger.info(
             f"检查训练集和验证集有效性中..."
         )
 
