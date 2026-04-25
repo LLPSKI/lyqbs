@@ -2,7 +2,8 @@ from pathlib import Path
 
 __all__ = [
     'is_files_all_exists',
-    'find_max_checkpoint'
+    'find_max_checkpoint',
+    'find_all_file'
 ]
 
 def is_files_all_exists(
@@ -37,3 +38,19 @@ def find_max_checkpoint(
         return None
     
     return max(checkpoints, key=lambda x: x.name)
+
+def find_all_file(
+    dir: str,
+    target: str
+) -> list[Path]:
+    """
+    得到指定目录下所有的目标文件
+    递归查找，没有找到则返回空列表
+    """
+    path = Path(dir)
+    target_files = [
+        p for p in path.rglob(target)
+        if p.is_file()
+    ]
+
+    return target_files
