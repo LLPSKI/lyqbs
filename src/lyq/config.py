@@ -18,34 +18,34 @@ class _ConfigSchema(TypedDict):
             - rank1.log
             - ...
         - image_dir/
-    - data_dir: 存放初始模型和模型训练检查点  
-        - output/
-            - Qwen/
-                - Qwenx-yB-z/
-                    - main/
-                        - config.json
-                        - generation_config.json
-                        - model.safetensors
-                        - tokenizer_config.json
-                        - tokenizer.json
-                    - lab_id/
-                        - checkpoint-00100/
-                            - ...
-                        - trace.jsonl  
-                        - lab.json
-                    - lab_id/
+    - output_dir: 存放初始模型和模型训练检查点  
+        - Qwen/
+            - Qwenx-yB-z/
+                - main/
+                    - config.json
+                    - generation_config.json
+                    - model.safetensors
+                    - tokenizer_config.json
+                    - tokenizer.json
+                - lab_id/
+                    - checkpoint-00100/
                         - ...
-            - xxx/
-                - ...  
-        - dataset/
-            - state.json  
-            - train.jsonl
-            - valid.jsonl
-            - small_vaild.jsonl
+                    - trace.jsonl  
+                    - lab.json
+                - lab_id/
+                    - ...
+        - xxx/
+            - ...  
+    - dataset_dir: 存放数据集  
+        - state.json  
+        - train.jsonl
+        - valid.jsonl
+        - small_vaild.jsonl
     """
     project_name: str
     base_dir: str
-    data_dir: str
+    output_dir: str
+    dataset_dir: str
 
 class Configs:
     """
@@ -55,18 +55,19 @@ class Configs:
     - base_dir
         - state_file
         - log_file
-    - data_dir
-        - output_dir
-        - dataset_dir
-            - train_file
-            - valid_file
-            - small_valid_file
+    - output_dir
+        - ...
+    - dataset_dir
+        - train_file
+        - valid_file
+        - small_valid_file
     """
 
     _default_config: _ConfigSchema = {
         'project_name': "lyqbs",
         'base_dir': "./",
-        'data_dir': "./"
+        'output_dir': "./",
+        "dataset_dir": "./"
     }
 
     def __init__(
@@ -86,6 +87,9 @@ class Configs:
             path = path if isinstance(path, Path) else Path(path)
 
         if not path.exists():
+            assert False, f"请用户最好自定义配置文件config.json\n" \
+                          f"参考配置如下：\n" \
+                          f"{self._default_config}"
             with path.open("w", encoding='utf-8') as f:
                 json.dump(
                     self._default_config,
@@ -112,14 +116,12 @@ class Configs:
         return self._configs['base_dir'] + 'image/'
     
     @cached_property
-    def data_dir(self) -> str:
-        return self._configs['data_dir']
-    @cached_property
     def output_dir(self) -> str:
-        return self.data_dir + 'output/'
+        return self._configs['output_dir']
+    
     @cached_property
     def dataset_dir(self) -> str:
-        return self.data_dir + 'dataset/'
+        return self._configs['dataset_dir']
     @cached_property
     def state_file(self) -> str:
         return self.dataset_dir + 'state.json'
