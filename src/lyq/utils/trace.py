@@ -17,6 +17,7 @@ from mpl_toolkits.mplot3d import (
 __all__ = [
     "draw_lab_trace_view",
     "draw_lab_grad_distribution_for_all_layers",
+    "draw_lab_grad_distribution_for_given_layer"
 ]
 
 class TraceStepSchema(TypedDict):
@@ -443,6 +444,8 @@ def draw_lab_trace_view(
 def draw_lab_grad_distribution_for_all_layers(
     image_dir: str,
     trace_file: Path,
+    begin_step: int,
+    end_step: int,
     without_embed: bool = False,
     begin_exponent: int = 0,
     end_exponent: int = 127,
@@ -468,7 +471,7 @@ def draw_lab_grad_distribution_for_all_layers(
     )
     
     for j, layer_dict in enumerate(list(traces.values())[0]['layer_dict']):
-        if not layer_dict:
+        if not layer_dict or j < begin_step or j > end_step:
             continue
         bucket_counts = [0 for _ in range(127)]
         for i, (name, layer) in enumerate(layer_dict.items()):
@@ -492,3 +495,50 @@ def draw_lab_grad_distribution_for_all_layers(
         fig.savefig(image_dir_path / 'all_layers_without_embed_grad_distribution.png')
     else:
         fig.savefig(image_dir_path / 'all_layers_grad_distribution.png')
+
+def draw_lab_grad_distribution_for_given_layer(
+    image_dir: str,
+    trace_file: Path,
+    layer: int,
+    begin_exponent: int = 0,
+    end_exponent: int = 127,
+) -> None:
+    """
+    指定trace.jsonl文件，将给定层作为一个整体绘制梯度分布图
+    """
+    assert trace_file.name == 'trace.jsonl', f"踪迹文件名称不符：{trace_file.name}！"
+
+    traces = _process_trace_files(
+        [trace_file]
+    )
+
+    fig = plt.figure(
+        num=None,
+        figsize=(8, 8),
+        dpi=300
+    )
+
+    ax3d: Axes3D = fig.add_subplot(
+        1, 1, 1,
+        projection='3d'
+    )
+    
+    for j, layer_dict in enumerate(list(traces.values())[0]['layer_dict']):
+        if not layer_dict:
+            continue
+        layer_name = list(layer_dict.keys())[layer]
+        bucket_counts = layer_dict[layer_name]
+        x = range(127)
+        y = [j for _ in range(127)]
+        ax3d.plot3D(
+            x[begin_exponent:end_exponent],
+            y[begin_exponent:end_exponent],
+            bucket_counts[begin_exponent:end_exponent]
+        )
+
+    ax3d.view_init(elev=20, azim=90)
+
+    image_dir_path = Path(image_dir) / trace_file.parent.name
+    if not image_dir_path.exists():
+        image_dir_path.mkdir(exist_ok=True)
+    fig.savefig(image_dir_path / f'{layer_name}: grad_distribution.png')

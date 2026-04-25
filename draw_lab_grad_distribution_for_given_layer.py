@@ -2,7 +2,7 @@ from pathlib import Path
 
 from lyq import *
 from lyq.utils.trace import (
-    draw_lab_grad_distribution_for_all_layers
+    draw_lab_grad_distribution_for_given_layer
 )
 
 if __name__ == '__main__':
@@ -11,12 +11,8 @@ if __name__ == '__main__':
     # 替换成所需实验的trace_file
     trace_file: Path = Path('/mnt/hdd2/liuyuqi/output/Qwen/Qwen2.5-0.5B/d40248a9c382ea1d54aa6f671465407a/trace.jsonl')
     
-    draw_lab_grad_distribution_for_all_layers(
+    draw_lab_grad_distribution_for_given_layer(
         configs.image_dir,
         trace_file,
-        begin_step=4000,
-        end_step=13100,
-        without_embed=True,
-        begin_exponent=102,
-        end_exponent=117
+        layer=1
     )
