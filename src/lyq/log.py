@@ -28,8 +28,8 @@ class Logger:
         self.is_multirank = is_multirank
         
         if self.is_multirank:
-            assert rank, "当使用多进程日志时，必须指定rank！"
-            assert is_master, "当使用多进程日志时，必须指定is_master！"
+            assert rank is not None, "当使用多进程日志时，必须指定rank！"
+            assert is_master is not None, "当使用多进程日志时，必须指定is_master！"
             self.rank = rank
             self.is_master = is_master
         else:
