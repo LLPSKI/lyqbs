@@ -437,7 +437,10 @@ def draw_lab_trace_view(
 
     image_dir_path = Path(image_dir) / trace_file.parent.name
     if not image_dir_path.exists():
-        image_dir_path.mkdir(exist_ok=True)
+        image_dir_path.mkdir(
+            parents=True,
+            exist_ok=True
+        )
     fig.savefig(image_dir_path / 'train_loss.png')
 
 def draw_lab_grad_distribution_for_all_layers(
@@ -487,7 +490,10 @@ def draw_lab_grad_distribution_for_all_layers(
 
     image_dir_path = Path(image_dir) / trace_file.parent.name
     if not image_dir_path.exists():
-        image_dir_path.mkdir(exist_ok=True)
+        image_dir_path.mkdir(
+            parents=True,
+            exist_ok=True
+        )
     if without_embed:
         fig.savefig(image_dir_path / 'all_layers_without_embed_grad_distribution.png')
     else:
