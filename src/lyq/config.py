@@ -12,11 +12,12 @@ class _ConfigSchema(TypedDict):
     配置项
 
     - project_name: 项目名称  
-    - base_dir: 存放运行日志文件  
+    - base_dir: 存放运行日志文件和生成的图像信息  
         - log/
             - rank0.log
             - rank1.log
             - ...
+        - image_dir/
     - data_dir: 存放初始模型和模型训练检查点  
         - output/
             - Qwen/
@@ -106,6 +107,9 @@ class Configs:
     @cached_property
     def log_dir(self) -> str:
         return self._configs['base_dir'] + 'log/'
+    @cached_property
+    def image_dir(self) -> str:
+        return self._configs['base_dir'] + 'image/'
     
     @cached_property
     def data_dir(self) -> str:
