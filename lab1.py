@@ -1,8 +1,28 @@
 from lyq import *
+from lyq.dist import *
+from lyq.dist.lab import *
 
 if __name__ == '__main__':
     with global_env():
-        LyqLab().train(
-            checkpoint_nums=1,
-            checkpoint_steps=100
+        configs = Configs()
+        logger = Logger(
+            configs,
+            is_multirank=True,
+            rank=rank(),
+            is_master=is_master()
         )
+        lab = LyqLab(
+            configs,
+            logger,
+        )
+
+        lab.train(
+            checkpoint_nums=7,
+            checkpoint_steps=1000
+        )
+
+        # 测试模型训练有效性需要较长的时间
+        # if not lab.verify():
+        #     logger.info("实验训练好像出了什么问题？！")
+        # else:
+        #     logger.info("实验训练没有问题！")
