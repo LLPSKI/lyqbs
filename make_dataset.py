@@ -13,8 +13,16 @@ if __name__ == '__main__':
         configs,
         logger
     )
+
+    # 注意：不要一次下载太多，可能会超时报错
     lyqdataset.download_from_hf_hub(
         LyqDataset.DatasetID.FINEWEB_EDU,
         batch_size=10000,
-        batch_num=1000
+        batch_num=64
     )
+
+    is_valid = lyqdataset.verify()
+    if is_valid:
+        logger.info("数据集下载成功！")
+    else:
+        logger.info("数据集下载失败！！！")
