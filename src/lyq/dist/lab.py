@@ -146,6 +146,7 @@ class LyqLab():
     
     class Quan(Enum):
         NOQUAN = auto()
+        S1E4M3_104_QUAN = auto()
     
     _quan_map: dict[
         Quan,
@@ -158,6 +159,7 @@ class LyqLab():
         ]
     ] = {
         Quan.NOQUAN: noquan_hook,
+        Quan.S1E4M3_104_QUAN: s1e4m3_104_quan_hook,
     }
 
     def _check_quan(
@@ -170,6 +172,8 @@ class LyqLab():
         self._quan: LyqLab.Quan = quan
         if self._quan == LyqLab.Quan.NOQUAN:
             self._commmetrix = noquan_get_commmetrix()
+        elif self._quan == LyqLab.Quan.S1E4M3_104_QUAN:
+            self._commmetrix = s1e4m3_104_quan_get_commmetrix()
         self._comm_hook: Callable[
             [
                 dist.ProcessGroup,
@@ -404,7 +408,7 @@ class LyqLab():
         self._model: DDP = DDP(
             pretrain,
             init_sync=False,
-            # gradient_as_bucket_view=True,
+            gradient_as_bucket_view=True,
             bucket_cap_mb=20000,
         )
         self._model.register_comm_hook(None, self._comm_hook)
