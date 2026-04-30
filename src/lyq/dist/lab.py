@@ -147,6 +147,10 @@ class LyqLab():
     class Quan(Enum):
         NOQUAN = auto()
         S1E4M3_104_QUAN = auto()
+        S1E3M4_112_QUAN = auto()
+        S1E2M5_116_QUAN = auto()
+        S1E1M6_118_QUAN = auto()
+        S1E0M7_119_QUAN = auto()
     
     _quan_map: dict[
         Quan,
@@ -160,6 +164,10 @@ class LyqLab():
     ] = {
         Quan.NOQUAN: noquan_hook,
         Quan.S1E4M3_104_QUAN: s1e4m3_104_quan_hook,
+        Quan.S1E3M4_112_QUAN: s1e3m4_112_quan_hook,
+        Quan.S1E2M5_116_QUAN: s1e2m5_116_quan_hook,
+        Quan.S1E1M6_118_QUAN: s1e1m6_118_quan_hook,
+        Quan.S1E0M7_119_QUAN: s1e0m7_119_quan_hook,
     }
 
     def _check_quan(
@@ -172,8 +180,10 @@ class LyqLab():
         self._quan: LyqLab.Quan = quan
         if self._quan == LyqLab.Quan.NOQUAN:
             self._commmetrix = noquan_get_commmetrix()
-        elif self._quan == LyqLab.Quan.S1E4M3_104_QUAN:
-            self._commmetrix = s1e4m3_104_quan_get_commmetrix()
+            self._generator = torch.Generator(self._device).manual_seed(9527)
+        else:
+            self._commmetrix = s1exmy_base_commmetrix()
+            self._generator = s1exmy_base_generator()
         self._comm_hook: Callable[
             [
                 dist.ProcessGroup,
@@ -354,6 +364,7 @@ class LyqLab():
             Path(self._lab_trace_file).touch()
         self.logger.info(f"检查实验{self.id}文件夹完成！")
     
+    # TODO: 检查动态的随机数生成器保存文件，这个会根据卡的数量变化
     _checkpoint_files: list[str] = [
         "config.json",
         "generation_config.json",
@@ -416,6 +427,15 @@ class LyqLab():
             self._main_dir,
             trust_remote_code=True
         )
+
+        if self._where != self._main_dir:
+            checkpoint = torch.load(
+                self._ge_path,
+                map_location='cpu'
+            )
+            self._generator.set_state(
+                checkpoint['random']
+            )
     
     def _load_optim(self):
         if self._optim_type == LyqLab.Optim.ADAMW:
@@ -466,6 +486,7 @@ class LyqLab():
         self._device: torch.device = device()
         self._optim_path = Path(self._where) / "optim.pth"
         self._lr_path = Path(self._where) / "lr.pth"
+        self._ge_path = Path(self._where) / f"ge-[rank{rank()}].pth"
         self._warmup_steps = int(self._total_steps * self._lr_configs['warmup_ratio'])
         self._min_lr_ratio = self._lr_configs['min_lr_ratio']
         self.logger.info(
@@ -473,6 +494,7 @@ class LyqLab():
             f"从{self._where}加载模型：{self._model_id}\n"
             f"使用设备：{self._device}\n"
             f"向模型中加入量化：{self._quan.name}\n"
+            f"量化随机产生器加载路径：{self._ge_path}\n"
             f"加载优化器：{self._optim_type.name}\n"
             f"优化器配置：{self._optim_configs}\n"
             f"优化器加载路径：{self._optim_path}\n"
@@ -696,16 +718,29 @@ class LyqLab():
         )
         self.logger.info(f"保存学习率调度器完成！")
     
+    def _save_ge(self):
+        self.logger.info(f"保存随机数生成器中...")
+        checkponit = {
+            "random": self._generator.get_state(),
+        }
+        torch.save(
+            checkponit, 
+            self._checkpoint_dir + f"ge-[rank{rank()}].pth"
+        )
+        self.logger.info(f"保存随机数生成器完成！")
+    
     def _save_checkpoint(self) -> None:
         with sync_scope():
             self._checkpoint_dir = self._lab_dir + 'checkpoint-' + f'{self._step:05d}/'
             self.logger.info(
                 f"保存检查点目录路径：{self._checkpoint_dir}..."
             )
+            Path(self._checkpoint_dir).mkdir(exist_ok=True)
             if is_master():
                 self._save_model()
                 self._save_optim()
                 self._save_lr()
+            self._save_ge()
     
     def verify(self) -> bool:
         """
