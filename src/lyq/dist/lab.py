@@ -147,8 +147,13 @@ class LyqLab():
     class Quan(Enum):
         NOQUAN = auto()
         S1E4M3_104_QUAN = auto()
+        S1E3M4_106_QUAN = auto()
         S1E3M4_112_QUAN = auto()
+        S1E2M5_110_QUAN = auto()
         S1E2M5_116_QUAN = auto()
+        S1E1M6_110_QUAN = auto()
+        S1E1M6_111_QUAN = auto()
+        S1E1M6_112_QUAN = auto()
         S1E1M6_118_QUAN = auto()
         S1E0M7_119_QUAN = auto()
     
@@ -164,8 +169,13 @@ class LyqLab():
     ] = {
         Quan.NOQUAN: noquan_hook,
         Quan.S1E4M3_104_QUAN: s1e4m3_104_quan_hook,
+        Quan.S1E3M4_106_QUAN: s1e3m4_106_quan_hook,
         Quan.S1E3M4_112_QUAN: s1e3m4_112_quan_hook,
+        Quan.S1E2M5_110_QUAN: s1e2m5_110_quan_hook,
         Quan.S1E2M5_116_QUAN: s1e2m5_116_quan_hook,
+        Quan.S1E1M6_110_QUAN: s1e1m6_110_quan_hook,
+        Quan.S1E1M6_111_QUAN: s1e1m6_111_quan_hook,
+        Quan.S1E1M6_112_QUAN: s1e1m6_112_quan_hook,
         Quan.S1E1M6_118_QUAN: s1e1m6_118_quan_hook,
         Quan.S1E0M7_119_QUAN: s1e0m7_119_quan_hook,
     }
@@ -180,7 +190,7 @@ class LyqLab():
         self._quan: LyqLab.Quan = quan
         if self._quan == LyqLab.Quan.NOQUAN:
             self._commmetrix = noquan_get_commmetrix()
-            self._generator = torch.Generator(self._device).manual_seed(9527)
+            self._generator = torch.Generator(device()).manual_seed(9527)
         else:
             self._commmetrix = s1exmy_base_commmetrix()
             self._generator = s1exmy_base_generator()
@@ -679,9 +689,6 @@ class LyqLab():
         """
         继续训练checkpoint_nums个检查点
         """
-        # assert checkpoint_nums >= 1, f"训练参数checkpoint_nums={checkpoint_nums}不合法！"
-        # assert checkpoint_steps >= 10, f"训练参数checkpoint_steps={checkpoint_steps}不合法！"
-
         self._prepare_for_train()
 
         self.logger.info(
