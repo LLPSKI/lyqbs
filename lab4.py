@@ -14,12 +14,12 @@ if __name__ == '__main__':
         lab = LyqLab(
             configs,
             logger,
-            quan=LyqLab.Quan.S1E2M5_116_QUAN
+            quan=LyqLab.Quan.S1E2M5_110_QUAN
         )
         
         lab.train(
-            checkpoint_nums=1,
-            checkpoint_steps=10
+            checkpoint_nums=4,
+            checkpoint_steps=10000
         )
 
         # 测试模型训练有效性需要较长的时间
